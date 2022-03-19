@@ -11,45 +11,48 @@ namespace Gomoku
     class GameWorkflow
     {
         public ConsoleIO io = new ConsoleIO();
-        public void Run()
-        {
-            
+        const int MAXPLAYERS = 2;
+        public bool Run()
+        { 
             io.DisplayTitle();
             IPlayer player1, player2;
-            const int MAXPLAYERS = 2;
-            int row = 0, column = 0;
-            bool valid = false;
             Result result;
-            Stone stone;
+            bool startGame = true, isPlaying = true, valid = false;
 
             player1 = ReturnPlayerType(MAXPLAYERS, 1);
             player2 = ReturnPlayerType(MAXPLAYERS, 2);
             GomokuEngine gomokuEngine = new GomokuEngine(player1, player2);
 
-            io.DisplayMessage($"\n(Randomizing)\n\n{gomokuEngine.Current.Name} goes first.");
-
-            while (!valid)
+            io.Display($"\n(Randomizing)\n\n{gomokuEngine.Current.Name} goes first.");
+            while (isPlaying)
             {
-                io.DisplayMessage($"\n{gomokuEngine.Current.Name}'s Turn\nEnter a row: ");
-                row = int.Parse(Console.ReadLine());
-                io.DisplayMessage("Enter a column: ");
-                column = int.Parse(Console.ReadLine());
-                
-                stone = new Stone(row-1, column-1, true);
-
-                result = gomokuEngine.Place(stone);
-                if(result.IsSuccess == true)
+                result = PromptMove(gomokuEngine);
+                io.PrintBoard(gomokuEngine);
+                io.Display(result.Message);
+                if (gomokuEngine.IsOver == true)
                 {
-                    valid = true;
-                }
-                else
-                {
-                    io.DisplayMessage(result.Message);
+                    isPlaying = false;
                 }
             }
-
-            io.PrintBoard(gomokuEngine);
-
+            while (!valid)
+            {
+                io.Display($"\nPlay Again? [y/n]: ");
+                switch (Console.ReadLine().ToLower())
+                {
+                    case "y":
+                        valid = true;
+                        startGame = true;
+                        break;
+                    case "n":
+                        valid = true;
+                        startGame = false;
+                        break;
+                    default:
+                        io.Display("Invalid Response.");
+                        break;
+                }
+             }
+            return startGame;
         }
 
         internal IPlayer ReturnPlayerType(int max, int playerNum)
@@ -74,7 +77,7 @@ namespace Gomoku
             switch (result)
             {
                 case 1:
-                    io.DisplayMessage($"\nPlayer {playerNum}, enter your name: ");
+                    io.Display($"\nPlayer {playerNum}, enter your name: ");
                     player = new HumanPlayer(System.Console.ReadLine()); ;
                     break;
                 default:
@@ -84,6 +87,44 @@ namespace Gomoku
 
             return player;
 
+        }
+        internal Result PromptMove(GomokuEngine gomokuEngine)
+        {
+            bool valid = false;
+            Stone stone;
+            Result result=null;
+            while (!valid)
+            {
+                io.Display($"\n{gomokuEngine.Current.Name}'s Turn\n");
+                if (gomokuEngine.Current.GetType() == typeof(RandomPlayer))
+                {
+                    stone = gomokuEngine.Current.GenerateMove(gomokuEngine.Stones);
+                    io.Display($"Row: {stone.Row}\nColumn:{stone.Column}\n");
+                    io.Display("\nPress any key to continue.\n");
+                    Console.ReadKey();
+                }
+                else
+                {
+                    io.Display($"Enter a row: ");
+                    int row = int.Parse(Console.ReadLine());
+                    io.Display("Enter a column: ");
+                    int column = int.Parse(Console.ReadLine());
+                    stone = new Stone(row - 1, column - 1, gomokuEngine.IsBlacksTurn);
+                }
+
+                result = gomokuEngine.Place(stone);
+                if (result.IsSuccess == true)
+                {
+                    valid = true;
+                }
+                else
+                {
+                    io.Display(result.Message);
+                    continue;
+                }
+            }
+            return result;
+            
         }
     }
 }

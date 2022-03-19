@@ -9,7 +9,11 @@ namespace Gomoku
         static void Main(string[] args)
         {
             GameWorkflow gameWorkflow = new GameWorkflow();
-            gameWorkflow.Run();
+            bool play = true;
+            while (play)
+            {
+                play = gameWorkflow.Run();
+            }
         }
 
         

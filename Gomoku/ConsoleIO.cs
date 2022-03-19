@@ -20,13 +20,14 @@ namespace Gomoku
         {
             System.Console.Write($"\nPlayer {playerNum} is:\n1. Human\n2. Random Player\nSelect [1-2]: ");
         }
-        public void DisplayMessage(string message)
+        public void Display(string message)
         {
             System.Console.Write(message);
         }
 
         public void PrintBoard(GomokuEngine gomokuEngine)
         {
+            Console.WriteLine("");
             for (int r = 0; r < GomokuEngine.WIDTH + 1; r++)
             {
                 for (int c = 0; c < GomokuEngine.WIDTH + 1; c++)
@@ -34,32 +35,21 @@ namespace Gomoku
                     Console.Write(" ");
                     if (r == 0)
                     {
-                        if (c == 0) { Console.Write("  "); }     //if [0,0]
-                        else if (c < 10)
-                        {
-                            Console.Write($"0{c}");
-                        }
+                        if (c == 0) { Console.Write("  "); }
                         else
                         {
-                            Console.Write(c);
+                            Console.Write($"{c:D2}"); //:D2
                         }
                         continue;
                     }
                     if (c == 0)
                     {
-                        if (r < 10)
-                        {
-                            Console.Write($"0{r}");
-                        }
-                        else
-                        {
-                            Console.Write(r);
-                        }
+                        Console.Write($"{r:D2}");
                         continue;
                     }
-
+                    bool isFilled = false;
                     for (int index = 0; index < gomokuEngine.Stones.Length; index++)
-                    {
+                    {  
                         if (gomokuEngine.Stones[index].Row+1 == r && gomokuEngine.Stones[index].Column+1 == c)
                         {
                             if (gomokuEngine.Stones[index].IsBlack)
@@ -70,21 +60,13 @@ namespace Gomoku
                             {
                                 Console.Write("O ");
                             }
-                        }
-                        else
-                        {
-                            Console.Write("__");
-                            //Console.Write($"{r}{c}");
+                            isFilled = true;
                         }
                     }
-
-                    //if board space empty, print __
-
-                    //if board space is occupied by stone, print appropriate stone symbol
-                    //for length of stone array,
-                    //if stone.row == r && stone.column == c
-                    //print X or O depending
-                    //if(gomokuEngine.board[r,c])
+                    if (!isFilled)
+                    {
+                        Console.Write("__");
+                    }
                 }
                 Console.WriteLine("");
             }
